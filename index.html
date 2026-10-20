@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Arabe">
+<meta name="theme-color" content="#1A5F7A">
+<title>Révision arabe libanais</title>
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="icon.png">
+<script>if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js");}</script>
+<style>
+:root{--teal:#1A5F7A;--teal2:#2C8CA8;--tealbg:#E8F2F5;--soft:#F4F8FA;--ink:#1f2a30;--muted:#5d6b73;--ok:#1E8E4E;--okbg:#E5F5EB;--ko:#C0392B;--kobg:#FBEAE8;--amber:#B9770E;--line:#d9e3e8}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:var(--soft);font-size:17px;line-height:1.45}
+.ar,.mono,input.ans{font-family:ui-monospace,"SF Mono",Menlo,Consolas,"DejaVu Sans Mono",monospace}
+.ar .dg{color:var(--teal);font-weight:800}
+header{position:sticky;top:0;z-index:5;background:var(--teal);color:#fff;padding:calc(10px + env(safe-area-inset-top)) 16px 10px;display:flex;align-items:center;gap:10px;box-shadow:0 2px 8px rgba(0,0,0,.12)}
+header h1{font-size:18px;margin:0;flex:1;font-weight:700;letter-spacing:.2px}
+header .score{background:rgba(255,255,255,.18);border-radius:999px;padding:5px 12px;font-size:15px;font-weight:600;white-space:nowrap}
+header button.home{background:rgba(255,255,255,.18);color:#fff;border:0;border-radius:10px;font-size:16px;padding:8px 12px;cursor:pointer}
+main{max-width:760px;margin:0 auto;padding:16px 14px calc(40px + env(safe-area-inset-bottom))}
+.card{background:#fff;border-radius:16px;padding:18px;box-shadow:0 1px 3px rgba(26,95,122,.12);margin-bottom:14px}
+h2{font-size:17px;color:var(--teal);margin:0 0 10px}
+.muted{color:var(--muted);font-size:15px}
+.modes{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+.mode{display:flex;gap:12px;align-items:center;text-align:left;background:#fff;border:2px solid var(--line);border-radius:16px;padding:14px;min-height:74px;cursor:pointer;font-size:16px;color:var(--ink);transition:border-color .15s,transform .1s}
+.mode:hover{border-color:var(--teal2)} .mode:active{transform:scale(.98)}
+.mode .ic{flex:0 0 44px;height:44px;border-radius:12px;background:var(--tealbg);color:var(--teal);display:flex;align-items:center;justify-content:center;font-weight:800;font-family:ui-monospace,Menlo,monospace;font-size:16px}
+.mode b{display:block;font-size:16px} .mode small{color:var(--muted);font-size:13px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:inline-flex;align-items:center;gap:8px;border:2px solid var(--line);border-radius:999px;padding:8px 14px;min-height:44px;cursor:pointer;background:#fff;font-size:15px;user-select:none}
+.chip input{width:18px;height:18px;accent-color:var(--teal);margin:0}
+.chip.on{border-color:var(--teal);background:var(--tealbg)}
+.seg{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 12px}
+.seg button{flex:1 1 auto;min-height:44px;border:2px solid var(--line);background:#fff;border-radius:12px;padding:8px 12px;font-size:15px;cursor:pointer;color:var(--ink)}
+.seg button.on{border-color:var(--teal);background:var(--teal);color:#fff}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:50px;padding:10px 18px;border-radius:14px;border:0;font-size:17px;font-weight:600;cursor:pointer;background:var(--teal);color:#fff}
+.btn.sec{background:var(--tealbg);color:var(--teal)} .btn.ok{background:var(--ok)} .btn.ko{background:var(--ko)} .btn.ghost{background:transparent;color:var(--muted);border:2px solid var(--line)}
+.btn:disabled{opacity:.5}
+.row{display:flex;gap:10px;flex-wrap:wrap} .row>.btn{flex:1 1 140px}
+.progress{height:8px;background:var(--line);border-radius:99px;overflow:hidden;margin-bottom:12px}
+.progress i{display:block;height:100%;background:var(--teal2);transition:width .2s}
+.flash{perspective:1200px;margin-bottom:14px;cursor:pointer;user-select:none}
+.flash .inner{position:relative;min-height:240px;transition:transform .45s;transform-style:preserve-3d}
+.flash.flipped .inner{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;background:#fff;border-radius:20px;box-shadow:0 2px 10px rgba(26,95,122,.15);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:22px;text-align:center}
+.face.back{transform:rotateY(180deg);background:var(--tealbg)}
+.face .big{font-size:28px;font-weight:700;word-break:break-word}
+.face .sub{margin-top:10px;color:var(--muted);font-size:15px}
+.face .tag{position:absolute;top:12px;left:14px;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}
+.face .hint{position:absolute;bottom:12px;font-size:13px;color:var(--muted)}
+.badge{display:inline-block;font-size:12px;font-weight:600;background:#FFF3D6;color:var(--amber);border:1px solid #F1D08A;border-radius:999px;padding:2px 8px;margin-left:6px;vertical-align:middle;font-family:-apple-system,BlinkMacSystemFont,sans-serif}
+.lbadge{display:inline-block;font-size:12px;background:var(--tealbg);color:var(--teal);border-radius:999px;padding:2px 8px}
+.prompt{font-size:24px;font-weight:700;margin:6px 0 4px;word-break:break-word}
+.prompt .pron{color:var(--teal)}
+input.ans{width:100%;font-size:20px;padding:14px 14px;border-radius:14px;border:2px solid var(--line);outline:none;background:#fff;color:var(--ink);margin:10px 0}
+input.ans:focus{border-color:var(--teal2)}
+.fb{border-radius:14px;padding:12px 14px;margin:6px 0 12px;font-size:16px}
+.fb.ok{background:var(--okbg);color:var(--ok);border:2px solid #9fd8b4}
+.fb.ko{background:var(--kobg);color:var(--ko);border:2px solid #efb3ab}
+.fb .exp{font-size:20px;font-weight:700;color:var(--ink);margin-top:4px}
+table.grid{width:100%;border-collapse:separate;border-spacing:0 8px}
+table.grid td{vertical-align:middle}
+table.grid td.p{width:34%;padding-right:8px;font-weight:700;color:var(--teal)}
+table.grid td.p small{display:block;font-weight:400;color:var(--muted);font-size:13px;font-family:-apple-system,sans-serif}
+table.grid input{width:100%;font-size:18px;padding:11px 12px;border-radius:12px;border:2px solid var(--line);font-family:ui-monospace,"SF Mono",Menlo,monospace}
+table.grid input.ok{border-color:var(--ok);background:var(--okbg)}
+table.grid input.ko{border-color:var(--ko);background:var(--kobg);text-decoration:line-through;color:var(--ko)}
+table.grid .corr{font-size:15px;color:var(--ok);font-weight:700;margin-top:3px}
+select{width:100%;font-size:17px;min-height:48px;border-radius:12px;border:2px solid var(--line);padding:8px 10px;background:#fff;color:var(--ink)}
+.errlist{list-style:none;padding:0;margin:0}
+.errlist li{padding:10px 0;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:10px}
+.errlist li .n{color:var(--ko);font-weight:700;white-space:nowrap}
+.legend{font-size:14px;color:var(--muted);margin-top:8px}
+.summary{text-align:center;padding:26px 18px}
+.summary .big{font-size:44px;font-weight:800;color:var(--teal)}
+.boxes{display:flex;gap:6px;margin-top:8px}
+.boxes span{flex:1;text-align:center;background:var(--tealbg);border-radius:10px;padding:6px 0;font-size:13px;color:var(--teal)}
+.boxes span b{display:block;font-size:17px}
+@media (max-width:480px){.face .big{font-size:24px}.prompt{font-size:21px}header h1{font-size:16px}}
+
+</style>
+</head>
+<body>
+<header><button class="home" id="homeBtn" aria-label="Accueil">⌂ Accueil</button><h1 id="title">Révision arabe libanais</h1><span class="score" id="score" title="Score de la séance">0 / 0</span></header>
+<main id="view"></main>
+<script>
+/* =====================================================================
+   DONNÉES DES COURS (Heba, Preply)
+   Pour ajouter un cours : ajoute une entrée dans LESSONS, puis des lignes
+   dans ITEMS avec le même code de cours.
+   Champs : lesson, cat, fr, ar, alt (autres formes acceptées), notes,
+   analogy (true = complété par analogie, pas écrit au tableau)
+   cat : vocab, couleur, nombre, phrase, conj, poss, adj
+   Pour conj / poss / adj : group (verbe, nom ou adjectif) + pron
+   Pour phrase : rep / repFr (réponse type) si c'est une question
+   ===================================================================== */
+const LESSONS = [
+  { id: "0924", label: "24 sept", title: "Ce que j’aime" },
+  { id: "0928", label: "28 sept", title: "Possession + passé de akal" },
+  { id: "1001", label: "1er oct", title: "À qui est-ce ? (la min)" },
+  { id: "1004", label: "4 oct", title: "Couleurs (devoir corrigé)" },
+  { id: "1008", label: "8 oct", title: "Passé + shi et min" },
+  { id: "1015", label: "15 oct", title: "L’âge, les dizaines, nem et fe2" },
+  { id: "1019", label: "19 oct", title: "L’heure du réveil, mabsout / za3len" }
+];
+
+const PRONOUNS = ["ana", "ne7na", "enta", "ente", "ento", "houwe", "hiye", "henne"];
+const PRON_FR = { ana: "je", ne7na: "nous", enta: "tu (m)", ente: "tu (f)", ento: "vous", houwe: "il", hiye: "elle", henne: "ils / elles" };
+
+const GROUPS = {
+  /* verbes au passé */
+  akal:   { cat: "conj", label: "akal", fr: "manger" },
+  rakad:  { cat: "conj", label: "rakad", fr: "courir" },
+  taba5:  { cat: "conj", label: "taba5", fr: "cuisiner" },
+  nem:    { cat: "conj", label: "nem", fr: "dormir" },
+  fe2:    { cat: "conj", label: "fe2", fr: "se réveiller" },
+  lebis:  { cat: "conj", label: "lebis", fr: "s’habiller, mettre" },
+  l3eb:   { cat: "conj", label: "l3eb", fr: "jouer" },
+  /* noms + possessif */
+  kteb:   { cat: "poss", label: "ktéb", fr: "livre" },
+  ele:    { cat: "poss", label: "forme libre ele…", fr: "à moi, à toi…" },
+  beb:    { cat: "poss", label: "beb", fr: "porte" },
+  bweb:   { cat: "poss", label: "bweb", fr: "portes" },
+  batta:  { cat: "poss", label: "batta", fr: "canard" },
+  mal3a:  { cat: "poss", label: "mal3a", fr: "cuillère" },
+  sayne:  { cat: "poss", label: "sayne", fr: "plateau" },
+  akel:   { cat: "poss", label: "akel", fr: "nourriture" },
+  tyeb:   { cat: "poss", label: "tyeb", fr: "vêtements" },
+  sa7en:  { cat: "poss", label: "sa7en", fr: "assiette" },
+  bet:    { cat: "poss", label: "bet", fr: "maison" },
+  akle:   { cat: "poss", label: "akle", fr: "le repas" },
+  "3omor": { cat: "poss", label: "3omor", fr: "l’âge" },
+  /* adjectifs */
+  mabsout: { cat: "adj", label: "mabsout", fr: "content" },
+  za3len:  { cat: "adj", label: "za3len", fr: "fâché" },
+  m2a55ar: { cat: "adj", label: "m2a55ar", fr: "en retard, tard" }
+};
+
+const ITEMS = [
+  /* ---------- 24 sept · vocabulaire ---------- */
+  { lesson: "0924", cat: "vocab", fr: "nourriture", ar: "akel" },
+  { lesson: "0924", cat: "vocab", fr: "lait", ar: "7alib" },
+  { lesson: "0924", cat: "vocab", fr: "viande", ar: "la7me" },
+  { lesson: "0924", cat: "vocab", fr: "poulet", ar: "djej" },
+  { lesson: "0924", cat: "vocab", fr: "sucré / sucreries", ar: "7elo" },
+  { lesson: "0924", cat: "vocab", fr: "muhallabiye", ar: "mhallabiye", notes: "flan au lait" },
+  { lesson: "0924", cat: "vocab", fr: "houmous", ar: "7omos" },
+  { lesson: "0924", cat: "vocab", fr: "feuilles de vigne farcies", ar: "wara2 3enab" },
+  { lesson: "0924", cat: "vocab", fr: "courgette", ar: "kousa" },
+  { lesson: "0924", cat: "vocab", fr: "moutabal", ar: "mtabbal" },
+  { lesson: "0924", cat: "vocab", fr: "tomate / tomates", ar: "banadoura" },
+  { lesson: "0924", cat: "vocab", fr: "concombre", ar: "5yar" },
+  { lesson: "0924", cat: "vocab", fr: "carotte / carottes", ar: "jazar" },
+  { lesson: "0924", cat: "vocab", fr: "laitue", ar: "5ass" },
+  { lesson: "0924", cat: "vocab", fr: "avec", ar: "ma3" },
+  { lesson: "0924", cat: "vocab", fr: "le travail", ar: "che8el" },
+  { lesson: "0924", cat: "vocab", fr: "mon travail", ar: "che8le" },
+  { lesson: "0924", cat: "vocab", fr: "sommeil / dormir", ar: "nom" },
+  { lesson: "0924", cat: "vocab", fr: "veiller tard / soirée", ar: "sahar", notes: "à ne pas confondre avec safar" },
+  { lesson: "0924", cat: "vocab", fr: "voyage", ar: "safar" },
+  { lesson: "0924", cat: "vocab", fr: "cris", ar: "sari5" },
+  { lesson: "0924", cat: "vocab", fr: "seulement", ar: "bas", notes: "le 19 oct, bas veut aussi dire mais" },
+  { lesson: "0924", cat: "vocab", fr: "beaucoup", ar: "ktir" },
+  { lesson: "0924", cat: "vocab", fr: "un peu", ar: "chway" },
+  { lesson: "0924", cat: "vocab", fr: "j’aime", ar: "b7ebb", alt: ["ana b7ebb"] },
+  { lesson: "0924", cat: "vocab", fr: "je n’aime pas", ar: "ma b7ebb", alt: ["ana ma b7ebb"] },
+
+  /* ---------- 28 sept · vocabulaire ---------- */
+  { lesson: "0928", cat: "vocab", fr: "livre", ar: "ktéb", alt: ["kteb"] },
+  { lesson: "0928", cat: "vocab", fr: "ceci / ça (masculin)", ar: "hayda" },
+  { lesson: "0928", cat: "vocab", fr: "manger", ar: "akale", notes: "passé : akalet, akal…" },
+  { lesson: "0928", cat: "vocab", fr: "hier", ar: "mbere7" },
+  { lesson: "0928", cat: "vocab", fr: "oui", ar: "eh" },
+  { lesson: "0928", cat: "vocab", fr: "et", ar: "w" },
+  { lesson: "0928", cat: "vocab", fr: "quoi / qu’est-ce que", ar: "chou" },
+
+  /* ---------- 1er oct · vocabulaire ---------- */
+  { lesson: "1001", cat: "vocab", fr: "à qui", ar: "la min" },
+  { lesson: "1001", cat: "vocab", fr: "ceci (féminin)", ar: "hayde" },
+  { lesson: "1001", cat: "vocab", fr: "ceux-ci / celles-ci", ar: "haydol" },
+  { lesson: "1001", cat: "vocab", fr: "porte", ar: "beb" },
+  { lesson: "1001", cat: "vocab", fr: "portes", ar: "bweb" },
+  { lesson: "1001", cat: "vocab", fr: "canard", ar: "batta" },
+  { lesson: "1001", cat: "vocab", fr: "cuillère", ar: "mal3a" },
+  { lesson: "1001", cat: "vocab", fr: "plateau", ar: "sayne", alt: ["bsayne"] },
+
+  /* ---------- 4 oct · couleurs (devoir corrigé) ---------- */
+  { lesson: "1004", cat: "couleur", fr: "bleu", ar: "azra2" },
+  { lesson: "1004", cat: "couleur", fr: "vert", ar: "a5dar" },
+  { lesson: "1004", cat: "couleur", fr: "rouge", ar: "a7mar" },
+  { lesson: "1004", cat: "couleur", fr: "jaune", ar: "asfar" },
+  { lesson: "1004", cat: "couleur", fr: "noir", ar: "aswad" },
+  { lesson: "1004", cat: "couleur", fr: "brun / marron", ar: "banni" },
+  { lesson: "1004", cat: "couleur", fr: "orange", ar: "burt2ali" },
+  { lesson: "1004", cat: "couleur", fr: "gris", ar: "rmadi" },
+  { lesson: "1004", cat: "couleur", fr: "rose", ar: "zahri" },
+  { lesson: "1004", cat: "couleur", fr: "blanc", ar: "abyad" },
+  { lesson: "1004", cat: "couleur", fr: "violet", ar: "banafsaji" },
+  { lesson: "1004", cat: "couleur", fr: "sa couleur", ar: "lawno", notes: "hayda lawno azra2 : la couleur reste au masculin" },
+
+  /* ---------- 8 oct · vocabulaire ---------- */
+  { lesson: "1008", cat: "vocab", fr: "il a couru", ar: "rakad" },
+  { lesson: "1008", cat: "vocab", fr: "il a cuisiné", ar: "taba5" },
+  { lesson: "1008", cat: "vocab", fr: "jouer", ar: "l3eb", notes: "ento l3ebto = vous avez joué" },
+  { lesson: "1008", cat: "vocab", fr: "il s’est habillé / il a porté", ar: "lebis" },
+  { lesson: "1008", cat: "vocab", fr: "vêtements", ar: "tyeb" },
+  { lesson: "1008", cat: "vocab", fr: "il a mangé", ar: "akal" },
+  { lesson: "1008", cat: "vocab", fr: "le repas", ar: "akle", notes: "féminin, le t revient : akleeto" },
+  { lesson: "1008", cat: "vocab", fr: "assiette", ar: "sa7en", notes: "sa7n devant un suffixe" },
+  { lesson: "1008", cat: "vocab", fr: "maison", ar: "bet", notes: "bayt devant un suffixe" },
+  { lesson: "1008", cat: "vocab", fr: "c’est ça ? (question oui / non)", ar: "shi", notes: "à la fin de la phrase" },
+  { lesson: "1008", cat: "vocab", fr: "ne… pas", ar: "msh", alt: ["mesh"] },
+  { lesson: "1008", cat: "vocab", fr: "de qui ?", ar: "min", notes: "après le nom : bet min ?" },
+  { lesson: "1008", cat: "vocab", fr: "non", ar: "la2" },
+
+  /* ---------- 15 oct · vocabulaire ---------- */
+  { lesson: "1015", cat: "vocab", fr: "l’âge", ar: "3omor", notes: "3omr devant un suffixe" },
+  { lesson: "1015", cat: "vocab", fr: "combien", ar: "adde" },
+  { lesson: "1015", cat: "vocab", fr: "an / ans", ar: "sene" },
+  { lesson: "1015", cat: "vocab", fr: "il a dormi", ar: "nem" },
+  { lesson: "1015", cat: "vocab", fr: "il s’est réveillé", ar: "fe2" },
+
+  /* ---------- 19 oct · vocabulaire ---------- */
+  { lesson: "1019", cat: "vocab", fr: "à quelle heure ?", ar: "ayya se3a?" },
+  { lesson: "1019", cat: "vocab", fr: "l’heure", ar: "se3a", notes: "lse3a 7 = à 7 heures" },
+  { lesson: "1019", cat: "vocab", fr: "quand ?", ar: "aymta?" },
+  { lesson: "1019", cat: "vocab", fr: "le matin", ar: "lsobo7" },
+  { lesson: "1019", cat: "vocab", fr: "midi", ar: "ldohor" },
+  { lesson: "1019", cat: "vocab", fr: "tôt", ar: "bakir" },
+  { lesson: "1019", cat: "vocab", fr: "tard / en retard", ar: "m2a55ar" },
+  { lesson: "1019", cat: "vocab", fr: "content", ar: "mabsout" },
+  { lesson: "1019", cat: "vocab", fr: "fâché", ar: "za3len" },
+  { lesson: "1019", cat: "vocab", fr: "mais", ar: "bas", notes: "le 24 sept, bas voulait dire seulement" },
+
+  /* ---------- Nombres (15 oct) ---------- */
+  { lesson: "1015", cat: "nombre", fr: "2", ar: "tnen", notes: "vu dans 42" },
+  { lesson: "1015", cat: "nombre", fr: "6", ar: "setta", notes: "vu dans 56" },
+  { lesson: "1015", cat: "nombre", fr: "8", ar: "tmena", notes: "vu dans 78" },
+  { lesson: "1015", cat: "nombre", fr: "10", ar: "3ashra" },
+  { lesson: "1015", cat: "nombre", fr: "20", ar: "3eshrin" },
+  { lesson: "1015", cat: "nombre", fr: "30", ar: "tletin" },
+  { lesson: "1015", cat: "nombre", fr: "40", ar: "arb3in" },
+  { lesson: "1015", cat: "nombre", fr: "50", ar: "5amsin" },
+  { lesson: "1015", cat: "nombre", fr: "60", ar: "settin" },
+  { lesson: "1015", cat: "nombre", fr: "70", ar: "sab3in" },
+  { lesson: "1015", cat: "nombre", fr: "80", ar: "tmenin" },
+  { lesson: "1015", cat: "nombre", fr: "90", ar: "tes3in" },
+  { lesson: "1015", cat: "nombre", fr: "100", ar: "miyye" },
+  { lesson: "1015", cat: "nombre", fr: "42", ar: "tnen w arb3in", notes: "unité + w + dizaine" },
+  { lesson: "1015", cat: "nombre", fr: "56", ar: "setta w 5amsin", notes: "unité + w + dizaine" },
+  { lesson: "1015", cat: "nombre", fr: "78", ar: "tmena w sab3in", notes: "unité + w + dizaine" },
+  { lesson: "1015", cat: "nombre", fr: "39", ar: "tes3a w tletin", analogy: true, notes: "tes3a (9) n’était pas écrit au tableau" },
+
+  /* ---------- Conjugaison au passé ---------- */
+  { lesson: "0928", cat: "conj", group: "akal", pron: "ana", ar: "akalet" },
+  { lesson: "0928", cat: "conj", group: "akal", pron: "ne7na", ar: "akalna" },
+  { lesson: "0928", cat: "conj", group: "akal", pron: "enta", ar: "akalet" },
+  { lesson: "0928", cat: "conj", group: "akal", pron: "ente", ar: "akalte" },
+  { lesson: "0928", cat: "conj", group: "akal", pron: "ento", ar: "akalto" },
+  { lesson: "0928", cat: "conj", group: "akal", pron: "houwe", ar: "akal" },
+  { lesson: "0928", cat: "conj", group: "akal", pron: "hiye", ar: "akalit", alt: ["akalet"], notes: "pour hiye, la fin s’entend et ou it" },
+  { lesson: "0928", cat: "conj", group: "akal", pron: "henne", ar: "akalo" },
+
+  { lesson: "1008", cat: "conj", group: "rakad", pron: "ana", ar: "rakadet" },
+  { lesson: "1008", cat: "conj", group: "rakad", pron: "ne7na", ar: "rakadna" },
+  { lesson: "1008", cat: "conj", group: "rakad", pron: "enta", ar: "rakadet" },
+  { lesson: "1008", cat: "conj", group: "rakad", pron: "ente", ar: "rakadte" },
+  { lesson: "1008", cat: "conj", group: "rakad", pron: "ento", ar: "rakadto" },
+  { lesson: "1008", cat: "conj", group: "rakad", pron: "houwe", ar: "rakad" },
+  { lesson: "1008", cat: "conj", group: "rakad", pron: "hiye", ar: "rakadet", alt: ["rakadit"], notes: "pour hiye, la fin s’entend et ou it" },
+  { lesson: "1008", cat: "conj", group: "rakad", pron: "henne", ar: "rakado" },
+
+  { lesson: "1008", cat: "conj", group: "taba5", pron: "ana", ar: "taba5et" },
+  { lesson: "1008", cat: "conj", group: "taba5", pron: "ne7na", ar: "taba5na" },
+  { lesson: "1008", cat: "conj", group: "taba5", pron: "enta", ar: "taba5et" },
+  { lesson: "1008", cat: "conj", group: "taba5", pron: "ente", ar: "taba5te" },
+  { lesson: "1008", cat: "conj", group: "taba5", pron: "ento", ar: "taba5to" },
+  { lesson: "1008", cat: "conj", group: "taba5", pron: "houwe", ar: "taba5" },
+  { lesson: "1008", cat: "conj", group: "taba5", pron: "hiye", ar: "taba5it", alt: ["taba5et"], notes: "pour hiye, la fin s’entend et ou it" },
+  { lesson: "1008", cat: "conj", group: "taba5", pron: "henne", ar: "taba5o" },
+
+  { lesson: "1008", cat: "conj", group: "lebis", pron: "houwe", ar: "lebis", notes: "houwe lebis tyebo" },
+  { lesson: "1008", cat: "conj", group: "lebis", pron: "hiye", ar: "lebsit", notes: "hiye lebsit tyeba" },
+  { lesson: "1008", cat: "conj", group: "lebis", pron: "ento", ar: "lbesto", notes: "ento lbesto tyebkon" },
+  { lesson: "1008", cat: "conj", group: "l3eb", pron: "ento", ar: "l3ebto", notes: "seule ligne vue au tableau" },
+
+  { lesson: "1015", cat: "conj", group: "nem", pron: "ana", ar: "nemet" },
+  { lesson: "1015", cat: "conj", group: "nem", pron: "ne7na", ar: "nemna" },
+  { lesson: "1015", cat: "conj", group: "nem", pron: "enta", ar: "nemet" },
+  { lesson: "1015", cat: "conj", group: "nem", pron: "ente", ar: "nemte" },
+  { lesson: "1015", cat: "conj", group: "nem", pron: "ento", ar: "nemto" },
+  { lesson: "1015", cat: "conj", group: "nem", pron: "houwe", ar: "nem" },
+  { lesson: "1015", cat: "conj", group: "nem", pron: "hiye", ar: "nemit", alt: ["nemet"], notes: "pour hiye, la fin s’entend et ou it" },
+  { lesson: "1015", cat: "conj", group: "nem", pron: "henne", ar: "nemo" },
+
+  { lesson: "1015", cat: "conj", group: "fe2", pron: "ana", ar: "fe2et" },
+  { lesson: "1015", cat: "conj", group: "fe2", pron: "ne7na", ar: "fe2na" },
+  { lesson: "1015", cat: "conj", group: "fe2", pron: "enta", ar: "fe2et" },
+  { lesson: "1015", cat: "conj", group: "fe2", pron: "ente", ar: "fe2te" },
+  { lesson: "1015", cat: "conj", group: "fe2", pron: "ento", ar: "fe2to" },
+  { lesson: "1015", cat: "conj", group: "fe2", pron: "houwe", ar: "fe2" },
+  { lesson: "1015", cat: "conj", group: "fe2", pron: "hiye", ar: "fe2it", alt: ["fe2et"], notes: "fe2it le 15 oct, fe2et le 19 oct" },
+  { lesson: "1015", cat: "conj", group: "fe2", pron: "henne", ar: "fe2o" },
+
+  /* ---------- Possessifs ---------- */
+  { lesson: "0928", cat: "poss", group: "kteb", pron: "ana", ar: "ktebe", full: "hayda ktebe" },
+  { lesson: "0928", cat: "poss", group: "kteb", pron: "ne7na", ar: "ktebna", full: "hayda ktebna" },
+  { lesson: "0928", cat: "poss", group: "kteb", pron: "enta", ar: "ktebak", full: "hayda ktebak" },
+  { lesson: "0928", cat: "poss", group: "kteb", pron: "ente", ar: "ktebik", full: "hayda ktebik" },
+  { lesson: "0928", cat: "poss", group: "kteb", pron: "ento", ar: "ktebkon", full: "hayda ktebkon" },
+  { lesson: "0928", cat: "poss", group: "kteb", pron: "houwe", ar: "ktebo", full: "hayda ktebo" },
+  { lesson: "0928", cat: "poss", group: "kteb", pron: "hiye", ar: "kteba", full: "hayda kteba" },
+  { lesson: "0928", cat: "poss", group: "kteb", pron: "henne", ar: "ktebon", full: "hayda ktebon" },
+
+  { lesson: "0928", cat: "poss", group: "ele", pron: "ana", ar: "ele", full: "hayda ele" },
+  { lesson: "0928", cat: "poss", group: "ele", pron: "ne7na", ar: "elna", full: "hayda elna" },
+  { lesson: "0928", cat: "poss", group: "ele", pron: "enta", ar: "elak", full: "hayda elak" },
+  { lesson: "0928", cat: "poss", group: "ele", pron: "ente", ar: "elik", full: "hayda elik" },
+  { lesson: "0928", cat: "poss", group: "ele", pron: "ento", ar: "elkon", full: "hayda elkon" },
+  { lesson: "0928", cat: "poss", group: "ele", pron: "houwe", ar: "elo", full: "hayda elo" },
+  { lesson: "0928", cat: "poss", group: "ele", pron: "hiye", ar: "ela", full: "hayda ela" },
+  { lesson: "0928", cat: "poss", group: "ele", pron: "henne", ar: "elon", full: "hayda elon" },
+
+  { lesson: "1001", cat: "poss", group: "beb", pron: "ana", ar: "bebe", full: "hayda bebe ana" },
+  { lesson: "1001", cat: "poss", group: "beb", pron: "ne7na", ar: "bebna", full: "hayda bebna ne7na" },
+  { lesson: "1001", cat: "poss", group: "beb", pron: "enta", ar: "bebak", full: "hayda bebak enta" },
+  { lesson: "1001", cat: "poss", group: "beb", pron: "ente", ar: "bebik", full: "hayda bebik ente" },
+  { lesson: "1001", cat: "poss", group: "beb", pron: "ento", ar: "bebkon", full: "hayda bebkon ento" },
+  { lesson: "1001", cat: "poss", group: "beb", pron: "houwe", ar: "bebo", full: "hayda bebo houwe" },
+  { lesson: "1001", cat: "poss", group: "beb", pron: "hiye", ar: "beba", full: "hayda beba hiye" },
+  { lesson: "1001", cat: "poss", group: "beb", pron: "henne", ar: "bebon", full: "hayda bebon henne" },
+
+  { lesson: "1001", cat: "poss", group: "bweb", pron: "ana", ar: "bwebe", full: "haydol bwebe ana" },
+  { lesson: "1001", cat: "poss", group: "bweb", pron: "ne7na", ar: "bwebna", full: "haydol bwebna ne7na" },
+  { lesson: "1001", cat: "poss", group: "bweb", pron: "enta", ar: "bwebak", full: "haydol bwebak enta" },
+  { lesson: "1001", cat: "poss", group: "bweb", pron: "ente", ar: "bwebik", full: "haydol bwebik ente" },
+  { lesson: "1001", cat: "poss", group: "bweb", pron: "ento", ar: "bwebkon", full: "haydol bwebkon ento", analogy: true },
+  { lesson: "1001", cat: "poss", group: "bweb", pron: "houwe", ar: "bwebo", full: "haydol bwebo houwe" },
+  { lesson: "1001", cat: "poss", group: "bweb", pron: "hiye", ar: "bweba", full: "haydol bweba hiye" },
+  { lesson: "1001", cat: "poss", group: "bweb", pron: "henne", ar: "bwebon", full: "haydol bwebon henne" },
+
+  { lesson: "1001", cat: "poss", group: "batta", pron: "ana", ar: "battete", full: "hayde battete ana" },
+  { lesson: "1001", cat: "poss", group: "batta", pron: "ne7na", ar: "battetna", full: "hayde battetna ne7na" },
+  { lesson: "1001", cat: "poss", group: "batta", pron: "enta", ar: "battetak", full: "hayde battetak enta", analogy: true },
+  { lesson: "1001", cat: "poss", group: "batta", pron: "ente", ar: "battetik", full: "hayde battetik ente", analogy: true },
+  { lesson: "1001", cat: "poss", group: "batta", pron: "ento", ar: "battetkon", full: "hayde battetkon ento" },
+  { lesson: "1001", cat: "poss", group: "batta", pron: "houwe", ar: "batteto", full: "hayde batteto houwe", analogy: true },
+  { lesson: "1001", cat: "poss", group: "batta", pron: "hiye", ar: "betteta", alt: ["batteta"], full: "hayde betteta hiye", notes: "orthographe de Heba : betteta" },
+  { lesson: "1001", cat: "poss", group: "batta", pron: "henne", ar: "batteton", full: "hayde batteton henne", analogy: true },
+
+  { lesson: "1001", cat: "poss", group: "mal3a", pron: "ana", ar: "male3te", full: "hayde male3te ana" },
+  { lesson: "1001", cat: "poss", group: "mal3a", pron: "ne7na", ar: "male3etna", full: "hayde male3etna ne7na", analogy: true },
+  { lesson: "1001", cat: "poss", group: "mal3a", pron: "enta", ar: "male3tak", full: "hayde male3tak enta" },
+  { lesson: "1001", cat: "poss", group: "mal3a", pron: "ente", ar: "male3tik", full: "hayde male3tik ente", analogy: true },
+  { lesson: "1001", cat: "poss", group: "mal3a", pron: "ento", ar: "mal3etkon", alt: ["male3etkon", "male3tkon"], full: "hayde mal3etkon ento" },
+  { lesson: "1001", cat: "poss", group: "mal3a", pron: "houwe", ar: "male3to", full: "hayde male3to houwe" },
+  { lesson: "1001", cat: "poss", group: "mal3a", pron: "hiye", ar: "male3ta", full: "hayde male3ta hiye", analogy: true },
+  { lesson: "1001", cat: "poss", group: "mal3a", pron: "henne", ar: "male3ton", full: "hayde male3ton henne", analogy: true },
+
+  { lesson: "1001", cat: "poss", group: "sayne", pron: "ana", ar: "bsayente", full: "hayde bsayente ana" },
+  { lesson: "1001", cat: "poss", group: "sayne", pron: "ne7na", ar: "bsaynetna", full: "hayde bsaynetna ne7na" },
+  { lesson: "1001", cat: "poss", group: "sayne", pron: "enta", ar: "bsaynetak", full: "hayde bsaynetak enta" },
+  { lesson: "1001", cat: "poss", group: "sayne", pron: "ente", ar: "bsaynetik", full: "hayde bsaynetik ente", analogy: true },
+  { lesson: "1001", cat: "poss", group: "sayne", pron: "ento", ar: "bsaynetkon", full: "hayde bsaynetkon ento", analogy: true },
+  { lesson: "1001", cat: "poss", group: "sayne", pron: "houwe", ar: "bsayneto", full: "hayde bsayneto houwe", analogy: true },
+  { lesson: "1001", cat: "poss", group: "sayne", pron: "hiye", ar: "bsayneta", full: "hayde bsayneta hiye", analogy: true },
+  { lesson: "1001", cat: "poss", group: "sayne", pron: "henne", ar: "bsayneton", full: "hayde bsayneton henne" },
+
+  { lesson: "1001", cat: "poss", group: "akel", pron: "ana", ar: "akle", full: "hayda akle" },
+  { lesson: "1001", cat: "poss", group: "akel", pron: "ne7na", ar: "akelna", full: "hayda akelna" },
+  { lesson: "1001", cat: "poss", group: "akel", pron: "enta", ar: "aklak", full: "hayda aklak" },
+  { lesson: "1001", cat: "poss", group: "akel", pron: "ente", ar: "aklik", full: "hayda aklik" },
+  { lesson: "1001", cat: "poss", group: "akel", pron: "ento", ar: "akelkon", full: "hayda akelkon" },
+  { lesson: "1001", cat: "poss", group: "akel", pron: "houwe", ar: "aklo", full: "hayda aklo" },
+  { lesson: "1001", cat: "poss", group: "akel", pron: "hiye", ar: "akla", full: "hayda akla" },
+  { lesson: "1001", cat: "poss", group: "akel", pron: "henne", ar: "aklon", full: "hayda aklon" },
+
+  { lesson: "1008", cat: "poss", group: "tyeb", pron: "ana", ar: "tyebe", full: "haydol tyebe" },
+  { lesson: "1008", cat: "poss", group: "tyeb", pron: "enta", ar: "tyebak", full: "haydol tyebak" },
+  { lesson: "1008", cat: "poss", group: "tyeb", pron: "houwe", ar: "tyebo", full: "houwe lebis tyebo" },
+  { lesson: "1008", cat: "poss", group: "tyeb", pron: "hiye", ar: "tyeba", full: "hiye lebsit tyeba" },
+  { lesson: "1008", cat: "poss", group: "tyeb", pron: "ento", ar: "tyebkon", full: "ento lbesto tyebkon" },
+  { lesson: "1008", cat: "poss", group: "sa7en", pron: "ana", ar: "sa7ne", full: "hayda sa7ne" },
+  { lesson: "1008", cat: "poss", group: "sa7en", pron: "enta", ar: "sa7nak", full: "hayda sa7nak" },
+  { lesson: "1008", cat: "poss", group: "bet", pron: "ana", ar: "bayte", full: "hayda bayte" },
+  { lesson: "1008", cat: "poss", group: "bet", pron: "enta", ar: "baytak", full: "hayda baytak" },
+  { lesson: "1008", cat: "poss", group: "bet", pron: "ente", ar: "baytik", full: "hayda baytik" },
+  { lesson: "1008", cat: "poss", group: "akle", pron: "houwe", ar: "akleeto", alt: ["akleto"], full: "houwe akal akleeto" },
+  { lesson: "1008", cat: "poss", group: "akle", pron: "hiye", ar: "akleeta", alt: ["akleta"], full: "hiye akalit akleeta" },
+  { lesson: "1008", cat: "poss", group: "akle", pron: "henne", ar: "akleeton", alt: ["akleton"], full: "henne akalo akleeton" },
+
+  { lesson: "1015", cat: "poss", group: "3omor", pron: "ana", ar: "3omre", full: "ana 3omre 20 sene" },
+  { lesson: "1015", cat: "poss", group: "3omor", pron: "ne7na", ar: "3omrna", analogy: true, notes: "pas écrit au tableau, par analogie avec ktebna" },
+  { lesson: "1015", cat: "poss", group: "3omor", pron: "enta", ar: "3omrak", full: "adde 3omrak?" },
+  { lesson: "1015", cat: "poss", group: "3omor", pron: "ente", ar: "3omrik", full: "adde 3omrik?" },
+  { lesson: "1015", cat: "poss", group: "3omor", pron: "ento", ar: "3omrkon", full: "adde 3omrkon?" },
+  { lesson: "1015", cat: "poss", group: "3omor", pron: "houwe", ar: "3omro", full: "houwe 3omro 20 sene" },
+  { lesson: "1015", cat: "poss", group: "3omor", pron: "hiye", ar: "3omra", full: "hiye 3omra 20 sene" },
+  { lesson: "1015", cat: "poss", group: "3omor", pron: "henne", ar: "3omron", full: "henne 3omron 20 sene" },
+
+  /* ---------- Accords des adjectifs (19 oct) ---------- */
+  { lesson: "1019", cat: "adj", group: "m2a55ar", pron: "ana", ar: "m2a55ar", notes: "une femme dirait ana m2a55ara" },
+  { lesson: "1019", cat: "adj", group: "m2a55ar", pron: "ne7na", ar: "m2a55arin" },
+  { lesson: "1019", cat: "adj", group: "m2a55ar", pron: "enta", ar: "m2a55ar" },
+  { lesson: "1019", cat: "adj", group: "m2a55ar", pron: "ente", ar: "m2a55ara" },
+  { lesson: "1019", cat: "adj", group: "m2a55ar", pron: "ento", ar: "m2a55arin" },
+  { lesson: "1019", cat: "adj", group: "m2a55ar", pron: "houwe", ar: "m2a55ar" },
+  { lesson: "1019", cat: "adj", group: "m2a55ar", pron: "hiye", ar: "m2a55ara" },
+  { lesson: "1019", cat: "adj", group: "m2a55ar", pron: "henne", ar: "m2a55arin" },
+  { lesson: "1019", cat: "adj", group: "mabsout", pron: "ana", ar: "mabsout", notes: "masculin (toi)" },
+  { lesson: "1019", cat: "adj", group: "mabsout", pron: "ne7na", ar: "mabsoutin" },
+  { lesson: "1019", cat: "adj", group: "mabsout", pron: "enta", ar: "mabsout" },
+  { lesson: "1019", cat: "adj", group: "mabsout", pron: "ente", ar: "mabsouta" },
+  { lesson: "1019", cat: "adj", group: "mabsout", pron: "ento", ar: "mabsoutin" },
+  { lesson: "1019", cat: "adj", group: "mabsout", pron: "houwe", ar: "mabsout" },
+  { lesson: "1019", cat: "adj", group: "mabsout", pron: "hiye", ar: "mabsouta" },
+  { lesson: "1019", cat: "adj", group: "mabsout", pron: "henne", ar: "mabsoutin" },
+  { lesson: "1019", cat: "adj", group: "za3len", pron: "ana", ar: "za3len", notes: "masculin (toi)" },
+  { lesson: "1019", cat: "adj", group: "za3len", pron: "ne7na", ar: "za3lenin" },
+  { lesson: "1019", cat: "adj", group: "za3len", pron: "enta", ar: "za3len" },
+  { lesson: "1019", cat: "adj", group: "za3len", pron: "ente", ar: "za3lene" },
+  { lesson: "1019", cat: "adj", group: "za3len", pron: "ento", ar: "za3lenin" },
+  { lesson: "1019", cat: "adj", group: "za3len", pron: "houwe", ar: "za3len" },
+  { lesson: "1019", cat: "adj", group: "za3len", pron: "hiye", ar: "za3lene" },
+  { lesson: "1019", cat: "adj", group: "za3len", pron: "henne", ar: "za3lenin" },
+
+  /* ---------- Phrases et questions / réponses ---------- */
+  { lesson: "0924", cat: "phrase", fr: "Qu’est-ce que tu aimes ?", ar: "chou bet7ebb?", rep: "ana b7ebb ktir l-shawarma djej.", repFr: "J’aime beaucoup le shawarma au poulet." },
+  { lesson: "0924", cat: "phrase", fr: "Qu’est-ce que tu n’aimes pas ?", ar: "chou ma bet7ebb?", rep: "ana ma b7ebb l-banadoura.", repFr: "Je n’aime pas les tomates." },
+  { lesson: "0924", cat: "phrase", fr: "J’aime la muhallabiye.", ar: "ana b7ebb l-mhallabiye." },
+  { lesson: "0924", cat: "phrase", fr: "J’aime le shawarma.", ar: "ana b7ebb l-shawarma." },
+  { lesson: "0924", cat: "phrase", fr: "J’aime un peu le shawarma à la viande.", ar: "ana b7ebb chway l-shawarma la7me." },
+  { lesson: "0924", cat: "phrase", fr: "J’aime beaucoup le houmous.", ar: "ana b7ebb ktir l-7omos." },
+  { lesson: "0924", cat: "phrase", fr: "J’aime beaucoup le houmous avec de la viande.", ar: "ana b7ebb ktir 7omos ma3 la7me." },
+  { lesson: "0924", cat: "phrase", fr: "J’aime mon travail.", ar: "ana b7ebb che8le." },
+  { lesson: "0924", cat: "phrase", fr: "J’aime beaucoup dormir.", ar: "ana b7ebb l-nom ktir." },
+  { lesson: "0924", cat: "phrase", fr: "Je n’aime pas les feuilles de vigne farcies.", ar: "ana ma b7ebb wara2 3enab." },
+  { lesson: "0924", cat: "phrase", fr: "Je n’aime pas la courgette.", ar: "ana ma b7ebb l-kousa." },
+  { lesson: "0924", cat: "phrase", fr: "Je n’aime pas le moutabal.", ar: "ana ma b7ebb l-mtabbal." },
+  { lesson: "0924", cat: "phrase", fr: "J’aime seulement les tomates de montagne.", ar: "ana b7ebb l-banadoura l-jabaliye bas." },
+  { lesson: "0924", cat: "phrase", fr: "Je n’aime pas veiller tard.", ar: "ana ma b7ebb l-sahar." },
+  { lesson: "0924", cat: "phrase", fr: "Je n’aime pas voyager.", ar: "ana ma b7ebb l-safar." },
+  { lesson: "0924", cat: "phrase", fr: "Je n’aime pas les cris.", ar: "ana ma b7ebb l-sari5." },
+
+  { lesson: "0928", cat: "phrase", fr: "C’est ton livre ?", ar: "hayda ktebak?", rep: "eh, hayda ktebe. ele!", repFr: "Oui, c’est mon livre. À moi !" },
+  { lesson: "0928", cat: "phrase", fr: "C’est son livre… à elle.", ar: "hayda kteba… ela." },
+  { lesson: "0928", cat: "phrase", fr: "Qu’est-ce que tu as mangé hier ?", ar: "chou akalet mbere7?", rep: "ana akalet shawarma. houwe akal 7omos.", repFr: "J’ai mangé un shawarma. Il a mangé du houmous." },
+
+  { lesson: "1001", cat: "phrase", fr: "À qui est cette porte ?", ar: "la min hayda lbeb?", rep: "hayda bebe ana. hayda ele.", repFr: "C’est ma porte. C’est à moi." },
+  { lesson: "1001", cat: "phrase", fr: "À qui est ce canard ?", ar: "la min hayde lbatta?", rep: "hayde betteta hiye. hayde ela.", repFr: "C’est son canard, à elle. C’est à elle." },
+  { lesson: "1001", cat: "phrase", fr: "À qui sont ces portes ?", ar: "la min haydol lbweb?", rep: "haydol bwebna ne7na. haydol elna.", repFr: "Ce sont nos portes. C’est à nous." },
+  { lesson: "1001", cat: "phrase", fr: "À qui est cette cuillère ?", ar: "la min hayde lmal3a?", rep: "hayde male3te ana. hayde ele.", repFr: "C’est ma cuillère. C’est à moi." },
+  { lesson: "1001", cat: "phrase", fr: "À qui est ce plateau ?", ar: "la min hayde lbsayne?", rep: "hayde bsayente ana. hayde ele.", repFr: "C’est mon plateau. C’est à moi." },
+
+  { lesson: "1004", cat: "phrase", fr: "Sa couleur est bleue.", ar: "hayda lawno azra2.", notes: "la couleur reste au masculin" },
+  { lesson: "1004", cat: "phrase", fr: "Sa couleur est jaune.", ar: "hayda lawno asfar." },
+
+  { lesson: "1008", cat: "phrase", fr: "C’est ton assiette ?", ar: "hayda sa7nak shi?", rep: "la2, hayda msh sa7ne.", repFr: "Non, ce n’est pas mon assiette." },
+  { lesson: "1008", cat: "phrase", fr: "C’est l’assiette de qui ?", ar: "sa7en min hayda?", rep: "hayda sa7en vivien.", repFr: "C’est l’assiette de Vivien." },
+  { lesson: "1008", cat: "phrase", fr: "C’est ta maison ? (à une femme)", ar: "hayda baytik shi?", rep: "la2! hayda mesh bayte.", repFr: "Non ! Ce n’est pas ma maison." },
+  { lesson: "1008", cat: "phrase", fr: "C’est la maison de qui ?", ar: "bet min hayda?", rep: "hayda bet vivien.", repFr: "C’est la maison de Vivien." },
+  { lesson: "1008", cat: "phrase", fr: "Ce sont tes vêtements ?", ar: "haydol tyebak shi?", rep: "la2, haydol mesh tyebe.", repFr: "Non, ce ne sont pas mes vêtements." },
+  { lesson: "1008", cat: "phrase", fr: "Ce sont les vêtements de qui ?", ar: "tyeb min haydol?", rep: "haydol tyeb sia.", repFr: "Ce sont les vêtements de Sia." },
+  { lesson: "1008", cat: "phrase", fr: "C’est ta maison. (à un homme)", ar: "hayda baytak." },
+  { lesson: "1008", cat: "phrase", fr: "Il a mis ses vêtements.", ar: "houwe lebis tyebo." },
+  { lesson: "1008", cat: "phrase", fr: "Elle a mis ses vêtements.", ar: "hiye lebsit tyeba." },
+  { lesson: "1008", cat: "phrase", fr: "Vous avez mis vos vêtements.", ar: "ento lbesto tyebkon." },
+  { lesson: "1008", cat: "phrase", fr: "Il a mangé son repas.", ar: "houwe akal akleeto." },
+  { lesson: "1008", cat: "phrase", fr: "Ils ont mangé leur repas.", ar: "henne akalo akleeton." },
+  { lesson: "1008", cat: "phrase", fr: "Oui, c’est mon assiette. J’ai cuisiné.", ar: "eh, hayda sa7ne. ana taba5et." },
+
+  { lesson: "1015", cat: "phrase", fr: "Tu as quel âge ? (à un homme)", ar: "adde 3omrak?", rep: "ana 3omre 39 sene.", repFr: "J’ai 39 ans." },
+  { lesson: "1015", cat: "phrase", fr: "Tu as quel âge ? (à une femme)", ar: "adde 3omrik?" },
+  { lesson: "1015", cat: "phrase", fr: "Vous avez quel âge ?", ar: "adde 3omrkon?" },
+  { lesson: "1015", cat: "phrase", fr: "Il a quel âge ?", ar: "adde 3omro?", rep: "houwe 3omro 20 sene.", repFr: "Il a 20 ans." },
+  { lesson: "1015", cat: "phrase", fr: "Elle a quel âge ?", ar: "adde 3omra?", rep: "hiye 3omra 20 sene.", repFr: "Elle a 20 ans." },
+  { lesson: "1015", cat: "phrase", fr: "Ils ont quel âge ?", ar: "adde 3omron?", rep: "henne 3omron 20 sene.", repFr: "Ils ont 20 ans." },
+  { lesson: "1015", cat: "phrase", fr: "Vivien a quel âge ?", ar: "adde 3omor vivien?" },
+  { lesson: "1015", cat: "phrase", fr: "Heba a quel âge ?", ar: "adde 3omor heba?" },
+  { lesson: "1015", cat: "phrase", fr: "Vivien et Heba ont quel âge ?", ar: "adde 3omor vivien w heba?" },
+  { lesson: "1015", cat: "phrase", fr: "J’ai 20 ans.", ar: "ana 3omre 20 sene." },
+  { lesson: "1015", cat: "phrase", fr: "Et toi, tu as dormi ?", ar: "w enta, nemet?", rep: "eh, ana nemet w fe2et.", repFr: "Oui, j’ai dormi et je me suis réveillé." },
+
+  { lesson: "1019", cat: "phrase", fr: "À quelle heure tu t’es réveillé ?", ar: "ayya se3a fe2et?", rep: "ana fe2et lse3a 7.", repFr: "Je me suis réveillé à 7 h." },
+  { lesson: "1019", cat: "phrase", fr: "Je me suis réveillé à 10 h.", ar: "ana fe2et lse3a 3ashra." },
+  { lesson: "1019", cat: "phrase", fr: "Quand tu t’es réveillé ?", ar: "aymta fe2et?", rep: "ana fe2et lsobo7.", repFr: "Je me suis réveillé le matin." },
+  { lesson: "1019", cat: "phrase", fr: "Je me suis réveillé à midi.", ar: "ana fe2et ldohor." },
+  { lesson: "1019", cat: "phrase", fr: "Je me suis réveillé tôt.", ar: "ana fe2et bakir." },
+  { lesson: "1019", cat: "phrase", fr: "Je me suis réveillé tard.", ar: "ana fe2et m2a55ar." },
+  { lesson: "1019", cat: "phrase", fr: "Elle s’est réveillée tard.", ar: "hiye fe2et m2a55ara." },
+  { lesson: "1019", cat: "phrase", fr: "Tu es content ?", ar: "enta mabsout?", rep: "eh, ana mabsout bas hiye za3lene.", repFr: "Oui, je suis content mais elle est fâchée." },
+  { lesson: "1019", cat: "phrase", fr: "Je suis fâché mais elle est contente.", ar: "ana za3len bas hiye mabsouta." },
+  { lesson: "1019", cat: "phrase", fr: "Je suis content mais toi, tu es fâchée.", ar: "ana mabsout bas ente za3lene." },
+  { lesson: "1019", cat: "phrase", fr: "Il est content mais elle est fâchée.", ar: "houwe mabsout bas hiye za3lene." },
+  { lesson: "1019", cat: "phrase", fr: "Vous êtes contents mais eux sont fâchés.", ar: "ento mabsoutin bas henne za3lenin." }
+];
+
+</script>
+<script>
+/* ===================== MOTEUR DE L’APPLI ===================== */
+(function () {
+  "use strict";
+  // ids stables
+  ITEMS.forEach(function (it) {
+    it.id = [it.lesson, it.cat, it.group || "", it.pron || "", it.ar].join("|");
+    it.alt = it.alt || [];
+  });
+  var LKEY = "revArabe.v1";
+  var store = load();
+  function load() {
+    try { var s = JSON.parse(localStorage.getItem(LKEY)); if (s && s.boxes) return s; } catch (e) {}
+    return { boxes: {}, errors: {}, lessons: null };
+  }
+  function save() { try { localStorage.setItem(LKEY, JSON.stringify(store)); } catch (e) {} }
+  var session = { ok: 0, total: 0 };
+  var selLessons = store.lessons || LESSONS.map(function (l) { return l.id; });
+
+  /* ---------- outils ---------- */
+  function $(s) { return document.querySelector(s); }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function arHTML(s) { return '<span class="ar">' + esc(s).replace(/[0-9]/g, function (d) { return '<span class="dg">' + d + "</span>"; }) + "</span>"; }
+  function shuffle(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+  function lessonOf(id) { for (var i = 0; i < LESSONS.length; i++) if (LESSONS[i].id === id) return LESSONS[i]; return { label: id }; }
+  function badge(it) { return it && it.analogy ? '<span class="badge" title="Pas écrit au tableau, complété sur le même patron">par analogie</span>' : ""; }
+  function lbadge(it) { return '<span class="lbadge">' + esc(lessonOf(it.lesson).label) + "</span>"; }
+  function inLessons(it) { return selLessons.indexOf(it.lesson) >= 0; }
+  function pick(cats) { return ITEMS.filter(function (it) { return cats.indexOf(it.cat) >= 0 && inLessons(it); }); }
+
+  /* comparaison tolérante */
+  function norm(s) {
+    s = String(s).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    s = s.replace(/[’'`]/g, "").replace(/\.\.\.|…/g, " ");
+    s = s.replace(/[?!.,;:«»"\-_\/()]/g, " ");
+    s = s.replace(/ch/g, "sh").replace(/ou/g, "o").replace(/y/g, "i");
+    s = s.split(/\s+/).filter(Boolean).map(function (w) { return w.length > 2 ? w.replace(/h$/, "") : w; }).join(" ");
+    s = s.replace(/([a-z])\1+/g, "$1");
+    return s.replace(/\s+/g, "");
+  }
+  function frNorm(s) {
+    s = String(s).toLowerCase().replace(/\b[ld][’']\s*/g, "").replace(/\s*\(.*?\)\s*/g, " ").trim();
+    s = s.replace(/^(le|la|les|un|une|des|du|de)\s+/, "");
+    return norm(s);
+  }
+  function frCandidates(fr) {
+    var out = [fr];
+    var noPar = fr.replace(/\(.*?\)/g, " ");
+    noPar.split(/\s*\/\s*|\s*,\s*|\s+ou\s+/).forEach(function (p) { if (p.trim()) out.push(p.trim()); });
+    return out;
+  }
+  function stripPron(input, pron) {
+    var n = norm(input), p = pron ? norm(pron) : "";
+    if (p && n.indexOf(p) === 0 && n.length > p.length) return n.slice(p.length);
+    return n;
+  }
+
+  /* question pour un item */
+  function question(it, dir) {
+    var q = {}, g = GROUPS[it.group];
+    if (it.cat === "conj" || it.cat === "poss" || it.cat === "adj") {
+      var verb = it.cat === "conj" ? " au passé" : it.cat === "poss" ? " + possessif" : " (accord)";
+      q.html = '<span class="pron ar">' + esc(it.pron) + '</span> <span class="muted">(' + esc(PRON_FR[it.pron]) + ")</span><br>" + arHTML(g.label) + ' <span class="muted">' + esc(g.fr) + verb + "</span>";
+      q.answers = [it.ar].concat(it.alt, it.full ? [it.full] : []);
+      q.expected = it.ar + (it.full && it.full !== it.ar ? "  (" + it.full + ")" : "");
+      q.check = function (v) { var n = stripPron(v, it.pron); return q.answers.some(function (a) { return norm(a) === n || stripPron(a, it.pron) === n; }); };
+      q.placeholder = "forme en arabizi";
+      return q;
+    }
+    if (it.cat === "nombre") {
+      if (dir === "ar2fr") {
+        q.html = arHTML(it.ar); q.expected = it.fr; q.placeholder = "le nombre en chiffres";
+        q.check = function (v) { return String(v).replace(/\D/g, "") === it.fr; };
+      } else {
+        q.html = '<span class="mono" style="font-size:40px">' + esc(it.fr) + "</span>"; q.expected = it.ar; q.placeholder = "en arabizi";
+        q.check = function (v) { return [it.ar].concat(it.alt).some(function (a) { return norm(a) === norm(v); }); };
+      }
+      return q;
+    }
+    // vocab, couleur, phrase
+    if (dir === "ar2fr") {
+      var same = ITEMS.filter(function (x) { return (x.cat === it.cat || (x.cat !== "phrase" && it.cat !== "phrase")) && norm(x.ar) === norm(it.ar); });
+      var cands = [];
+      same.forEach(function (x) { cands = cands.concat(frCandidates(x.fr)); });
+      q.html = arHTML(it.ar); q.expected = it.fr; q.placeholder = "en français";
+      q.check = function (v) { var n = frNorm(v); return n && cands.some(function (c) { return frNorm(c) === n; }); };
+    } else {
+      var same2 = ITEMS.filter(function (x) { return x.cat !== "conj" && x.cat !== "poss" && x.cat !== "adj" && frNorm(x.fr) === frNorm(it.fr); });
+      var ans = [];
+      same2.forEach(function (x) { ans = ans.concat([x.ar], x.alt); });
+      q.html = esc(it.fr); q.expected = [it.ar].concat(it.alt).join("  ou  "); q.placeholder = "en arabizi";
+      q.check = function (v) { var n = norm(v); return n && ans.some(function (a) { return norm(a) === n; }); };
+    }
+    return q;
+  }
+
+  /* score, erreurs, leitner */
+  function scoreUI() { var s = $("#score"); if (s) s.textContent = session.ok + " / " + session.total; }
+  function record(it, good, dir) {
+    session.total++; if (good) session.ok++;
+    if (good) { store.boxes[it.id] = Math.min(5, (store.boxes[it.id] || 1) + 1); }
+    else { store.boxes[it.id] = 1; var e = store.errors[it.id] || { n: 0 }; e.n++; e.dir = dir; store.errors[it.id] = e; }
+    save(); scoreUI();
+  }
+  function box(it) { return store.boxes[it.id] || 1; }
+  function buildDeck(items, n) {
+    var arr = shuffle(items).sort(function (a, b) { return box(a) - box(b); });
+    return arr.slice(0, n || 20);
+  }
+  function dirFor(d) { return d === "mix" ? (Math.random() < 0.5 ? "fr2ar" : "ar2fr") : d; }
+
+  /* ---------- écrans ---------- */
+  var view = $("#view");
+  var state = {};
+  function setTitle(t) { $("#title").textContent = t; $("#homeBtn").style.visibility = t === "Révision arabe libanais" ? "hidden" : "visible"; window.scrollTo(0, 0); }
+
+  var MODES = [
+    { id: "flash", ic: "A⇄", t: "Cartes vocabulaire", d: "retourne la carte, je savais ou à revoir" },
+    { id: "quiz", ic: "abc", t: "Quiz vocabulaire", d: "tape la réponse" },
+    { id: "conj", ic: "et", t: "Conjugaison", d: "le passé, une forme ou tout le tableau" },
+    { id: "poss", ic: "e·ak", t: "Possessifs", d: "ktebe, bebak, 3omro, ele…" },
+    { id: "adj", ic: "+a", t: "Accords", d: "mabsout, za3len, m2a55ar" },
+    { id: "num", ic: "42", t: "Nombres", d: "chiffre ou arabizi" },
+    { id: "phr", ic: "?!", t: "Phrases", d: "questions et réponses du cours" },
+    { id: "err", ic: "✗", t: "Mes erreurs", d: "revoir ce qui a coincé" }
+  ];
+
+  function home() {
+    setTitle("Révision arabe libanais");
+    var nErr = Object.keys(store.errors).length;
+    var h = '<div class="card"><h2>Cours à réviser</h2><div class="chips" id="lessons">';
+    h += '<label class="chip ' + (selLessons.length === LESSONS.length ? "on" : "") + '"><input type="checkbox" data-all="1" ' + (selLessons.length === LESSONS.length ? "checked" : "") + "> tout</label>";
+    LESSONS.forEach(function (l) {
+      var on = selLessons.indexOf(l.id) >= 0;
+      h += '<label class="chip ' + (on ? "on" : "") + '" title="' + esc(l.title) + '"><input type="checkbox" data-l="' + l.id + '" ' + (on ? "checked" : "") + "> " + esc(l.label) + "</label>";
+    });
+    h += '</div><p class="muted" style="margin:10px 0 0">' + pick(["vocab", "couleur", "nombre", "phrase", "conj", "poss", "adj"]).length + " cartes dans la sélection.</p></div>";
+    h += '<div class="modes">';
+    MODES.forEach(function (m) {
+      h += '<button class="mode" data-mode="' + m.id + '"><span class="ic">' + esc(m.ic) + "</span><span><b>" + esc(m.t) + (m.id === "err" && nErr ? " (" + nErr + ")" : "") + "</b><small>" + esc(m.d) + "</small></span></button>";
+    });
+    h += "</div>";
+    var vocab = ITEMS.filter(function (x) { return x.cat === "vocab" || x.cat === "couleur"; });
+    var counts = [0, 0, 0, 0, 0];
+    vocab.forEach(function (x) { counts[box(x) - 1]++; });
+    h += '<div class="card" style="margin-top:14px"><h2>Tes boîtes de mots</h2><div class="muted">Boîte 1 : à revoir souvent. Boîte 5 : acquis.</div><div class="boxes">';
+    counts.forEach(function (c, i) { h += "<span>boîte " + (i + 1) + "<b>" + c + "</b></span>"; });
+    h += '</div></div><div class="row"><button class="btn ghost" id="reset">Tout remettre à zéro</button></div>';
+    h += '<p class="legend">Code arabizi : ' + [["3","ع"],["7","ح"],["5","خ"],["8","غ"],["2","ء ou ق"]].map(function (c) { return '<span style="display:inline-block;margin-right:12px"><span class="ar"><span class="dg">' + c[0] + '</span></span> = <bdi>' + c[1] + '</bdi></span>'; }).join("") + '<br>Les chiffres sont en couleur pour bien les voir.</p>';
+    view.innerHTML = h;
+    view.querySelectorAll("#lessons input").forEach(function (cb) {
+      cb.addEventListener("change", function () {
+        if (cb.dataset.all) selLessons = cb.checked ? LESSONS.map(function (l) { return l.id; }) : [];
+        else {
+          var id = cb.dataset.l;
+          if (cb.checked) { if (selLessons.indexOf(id) < 0) selLessons.push(id); } else selLessons = selLessons.filter(function (x) { return x !== id; });
+        }
+        store.lessons = selLessons; save(); home();
+      });
+    });
+    view.querySelectorAll("[data-mode]").forEach(function (b) { b.addEventListener("click", function () { go(b.dataset.mode); }); });
+    $("#reset").addEventListener("click", function () {
+      if (confirm("Tout remettre à zéro ? Les boîtes, les erreurs et le score seront effacés.")) {
+        store = { boxes: {}, errors: {}, lessons: null }; selLessons = LESSONS.map(function (l) { return l.id; }); session = { ok: 0, total: 0 }; save(); scoreUI(); home();
+      }
+    });
+  }
+
+  function empty(msg) { view.innerHTML = '<div class="card"><p>' + esc(msg) + '</p><button class="btn" id="back">Retour</button></div>'; $("#back").onclick = home; }
+
+  function go(m) {
+    if (m === "flash") return setupFlash("vocab");
+    if (m === "phr") return setupFlash("phrase");
+    if (m === "quiz") return setupQuiz("vocab");
+    if (m === "num") return setupQuiz("nombre");
+    if (m === "conj" || m === "poss" || m === "adj") return setupGroup(m);
+    if (m === "err") return errorsScreen();
+  }
+
+  /* ---------- Cartes ---------- */
+  function setupFlash(kind) {
+    var isPh = kind === "phrase";
+    setTitle(isPh ? "Phrases" : "Cartes vocabulaire");
+    var dirs = isPh ? [["fr2ar", "FR → arabe"], ["ar2fr", "arabe → FR"], ["qa", "question → réponse"], ["mix", "aléatoire"]] : [["fr2ar", "FR → arabe"], ["ar2fr", "arabe → FR"], ["mix", "aléatoire"]];
+    var d = state["fdir" + kind] || "fr2ar";
+    var h = '<div class="card"><h2>Sens</h2><div class="seg" id="dirs">';
+    dirs.forEach(function (x) { h += '<button data-d="' + x[0] + '" class="' + (x[0] === d ? "on" : "") + '">' + esc(x[1]) + "</button>"; });
+    h += "</div>";
+    if (!isPh) h += '<h2>Quoi</h2><div class="seg" id="cats"><button data-c="all" class="on">mots + couleurs</button><button data-c="vocab">mots</button><button data-c="couleur">couleurs</button></div>';
+    h += '<button class="btn" id="start" style="width:100%">C’est parti</button></div>';
+    view.innerHTML = h;
+    var cat = "all";
+    view.querySelectorAll("#dirs button").forEach(function (b) { b.onclick = function () { d = b.dataset.d; state["fdir" + kind] = d; view.querySelectorAll("#dirs button").forEach(function (x) { x.classList.toggle("on", x === b); }); }; });
+    view.querySelectorAll("#cats button").forEach(function (b) { b.onclick = function () { cat = b.dataset.c; view.querySelectorAll("#cats button").forEach(function (x) { x.classList.toggle("on", x === b); }); }; });
+    $("#start").onclick = function () {
+      var items = isPh ? pick(["phrase"]) : pick(cat === "all" ? ["vocab", "couleur"] : [cat]);
+      if (d === "qa") items = items.filter(function (x) { return x.rep; });
+      if (!items.length) return empty("Rien à réviser avec ces cours. Coche d’autres dates sur l’accueil.");
+      runFlash(buildDeck(items, 20), d, function () { setupFlash(kind); });
+    };
+  }
+
+  function runFlash(deck, d, again) {
+    var i = 0, ok = 0, total = deck.length, requeued = {};
+    function show() {
+      if (i >= deck.length) return summary(ok, deck.length, again);
+      var it = deck[i], dd = d === "qa" ? "qa" : dirFor(d), front, back;
+      if (dd === "qa") { front = arHTML(it.ar) + '<div class="sub">' + esc(it.fr) + "</div>"; back = arHTML(it.rep) + '<div class="sub">' + esc(it.repFr || "") + "</div>"; }
+      else if (dd === "fr2ar") { front = esc(it.fr); back = arHTML(it.ar) + (it.alt.length ? '<div class="sub">aussi : ' + arHTML(it.alt.join(", ")) + "</div>" : ""); }
+      else { front = arHTML(it.ar); back = esc(it.fr); }
+      var note = (it.notes ? '<div class="sub">' + esc(it.notes) + "</div>" : "") + (it.rep && dd !== "qa" ? '<div class="sub">réponse type : ' + arHTML(it.rep) + "</div>" : "");
+      view.innerHTML = '<div class="progress"><i style="width:' + Math.round(100 * i / deck.length) + '%"></i></div>' +
+        '<div class="flash" id="fc"><div class="inner"><div class="face front"><span class="tag">' + esc(lessonOf(it.lesson).label) + '</span><div class="big">' + front + badge(it) + '</div><span class="hint">touche pour retourner</span></div>' +
+        '<div class="face back"><span class="tag">réponse</span><div class="big">' + back + "</div>" + note + "</div></div></div>" +
+        '<div class="row" id="ans" style="visibility:hidden"><button class="btn ko" id="no">À revoir</button><button class="btn ok" id="yes">Je savais</button></div>' +
+        '<p class="muted" style="text-align:center">' + (i + 1) + " / " + deck.length + " · boîte " + box(it) + "</p>";
+      var fc = $("#fc");
+      fc.onclick = function () { fc.classList.toggle("flipped"); $("#ans").style.visibility = "visible"; };
+      $("#yes").onclick = function () { record(it, true, dd === "qa" ? "fr2ar" : dd); if (!requeued[it.id]) ok++; i++; show(); };
+      $("#no").onclick = function () {
+        record(it, false, dd === "qa" ? "fr2ar" : dd);
+        if (!requeued[it.id]) { requeued[it.id] = 1; deck.splice(Math.min(deck.length, i + 4), 0, it); }
+        i++; show();
+      };
+    }
+    show();
+  }
+
+  function summary(ok, total, again) {
+    view.innerHTML = '<div class="card summary"><div class="muted">Série terminée</div><div class="big">' + ok + " / " + total + '</div><p>' + (ok === total ? "Parfait, bravo !" : ok >= total * 0.7 ? "Très bien, continue comme ça." : "Ça rentre, on recommence ?") + '</p><div class="row"><button class="btn" id="again">Encore une série</button><button class="btn sec" id="hm">Accueil</button></div></div>';
+    $("#again").onclick = again; $("#hm").onclick = home;
+  }
+
+  /* ---------- Quiz tapé ---------- */
+  function setupQuiz(kind) {
+    var isNum = kind === "nombre";
+    setTitle(isNum ? "Nombres" : "Quiz vocabulaire");
+    var dirs = isNum ? [["fr2ar", "chiffre → arabizi"], ["ar2fr", "arabizi → chiffre"], ["mix", "aléatoire"]] : [["fr2ar", "FR → arabe"], ["ar2fr", "arabe → FR"], ["mix", "aléatoire"]];
+    var d = state["qdir" + kind] || "fr2ar", cat = "all";
+    var h = '<div class="card"><h2>Sens</h2><div class="seg" id="dirs">';
+    dirs.forEach(function (x) { h += '<button data-d="' + x[0] + '" class="' + (x[0] === d ? "on" : "") + '">' + esc(x[1]) + "</button>"; });
+    h += "</div>";
+    if (!isNum) h += '<h2>Quoi</h2><div class="seg" id="cats"><button data-c="all" class="on">mots + couleurs</button><button data-c="vocab">mots</button><button data-c="couleur">couleurs</button><button data-c="phrase">phrases</button></div>';
+    h += '<button class="btn" id="start" style="width:100%">C’est parti</button><p class="legend">Pas de stress sur l’orthographe : majuscules, accents, espaces, ee ou e, ou ou o, y ou i, ch ou sh et le h final ne comptent pas.</p></div>';
+    view.innerHTML = h;
+    view.querySelectorAll("#dirs button").forEach(function (b) { b.onclick = function () { d = b.dataset.d; state["qdir" + kind] = d; view.querySelectorAll("#dirs button").forEach(function (x) { x.classList.toggle("on", x === b); }); }; });
+    view.querySelectorAll("#cats button").forEach(function (b) { b.onclick = function () { cat = b.dataset.c; view.querySelectorAll("#cats button").forEach(function (x) { x.classList.toggle("on", x === b); }); }; });
+    $("#start").onclick = function () {
+      var items = isNum ? pick(["nombre"]) : pick(cat === "all" ? ["vocab", "couleur"] : [cat]);
+      if (!items.length) return empty(isNum ? "Les nombres sont dans le cours du 15 oct. Coche-le sur l’accueil." : "Rien à réviser avec ces cours. Coche d’autres dates sur l’accueil.");
+      runQuiz(buildDeck(items, isNum ? items.length : 15).map(function (it) { return { it: it, dir: dirFor(d) }; }), function () { setupQuiz(kind); });
+    };
+  }
+
+  function runQuiz(deck, again, fromErrors) {
+    var i = 0, ok = 0;
+    function show() {
+      if (i >= deck.length) return summary(ok, deck.length, again);
+      var cur = deck[i], it = cur.it, q = question(it, cur.dir), answered = false;
+      view.innerHTML = '<div class="progress"><i style="width:' + Math.round(100 * i / deck.length) + '%"></i></div><div class="card"><div class="muted">' + lbadge(it) + " " + (i + 1) + " / " + deck.length + '</div><div class="prompt">' + q.html + badge(it) + '</div>' +
+        '<input class="ans" id="in" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="' + esc(q.placeholder) + '" ' + (q.placeholder.indexOf("chiffres") >= 0 ? 'inputmode="numeric"' : "") + '>' +
+        '<div id="fb"></div><div class="row"><button class="btn" id="go">Vérifier</button></div></div>';
+      var inp = $("#in"); inp.focus();
+      function check() {
+        if (answered) { i++; return show(); }
+        answered = true;
+        var good = q.check(inp.value);
+        if (good) ok++;
+        record(it, good, cur.dir);
+        if (fromErrors && good) { delete store.errors[it.id]; save(); }
+        var note = it.notes ? '<div class="muted">' + esc(it.notes) + "</div>" : "";
+        $("#fb").innerHTML = '<div class="fb ' + (good ? "ok" : "ko") + '">' + (good ? "Juste !" : "Pas tout à fait. La réponse :") + '<div class="exp">' + (cur.dir === "ar2fr" && it.cat !== "conj" ? esc(q.expected) : arHTML(q.expected)) + badge(it) + "</div>" + note + "</div>" +
+          (good ? "" : '<button class="btn ghost" id="override" style="width:100%;margin-bottom:10px">En fait, j’avais juste</button>');
+        inp.readOnly = true;
+        $("#go").textContent = "Suivant";
+        var ov = $("#override");
+        if (ov) ov.onclick = function () {
+          ok++; session.ok++; store.boxes[it.id] = 2; var e = store.errors[it.id]; if (e) { e.n--; if (e.n <= 0) delete store.errors[it.id]; } save(); scoreUI(); i++; show();
+        };
+        $("#go").focus();
+      }
+      $("#go").onclick = check;
+      inp.addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); check(); } });
+    }
+    show();
+  }
+
+  /* ---------- Conjugaison, possessifs, accords ---------- */
+  function groupsOf(cat) {
+    var gs = [];
+    Object.keys(GROUPS).forEach(function (g) {
+      if (GROUPS[g].cat !== cat) return;
+      var its = ITEMS.filter(function (x) { return x.group === g && inLessons(x); });
+      if (its.length) gs.push({ id: g, items: its });
+    });
+    return gs;
+  }
+  function setupGroup(cat) {
+    var title = { conj: "Conjugaison", poss: "Possessifs", adj: "Accords" }[cat];
+    setTitle(title);
+    var gs = groupsOf(cat);
+    if (!gs.length) return empty("Rien pour ces cours. Coche d’autres dates sur l’accueil.");
+    var mode = state["gmode" + cat] || "one", sel = state["gsel" + cat] || "rand";
+    if (sel !== "rand" && !gs.some(function (g) { return g.id === sel; })) sel = "rand";
+    var h = '<div class="card"><h2>Exercice</h2><div class="seg" id="gm"><button data-m="one" class="' + (mode === "one" ? "on" : "") + '">une forme à la fois</button><button data-m="grid" class="' + (mode === "grid" ? "on" : "") + '">tableau à compléter</button></div>';
+    h += '<h2>' + (cat === "conj" ? "Verbe" : cat === "poss" ? "Nom" : "Adjectif") + '</h2><select id="gs"><option value="rand">au hasard (tous)</option>';
+    gs.forEach(function (g) { var G = GROUPS[g.id]; h += '<option value="' + esc(g.id) + '" ' + (sel === g.id ? "selected" : "") + ">" + esc(G.label + " · " + G.fr + (g.items.length < 8 ? " (" + g.items.length + " formes vues)" : "")) + "</option>"; });
+    h += '</select><div style="height:12px"></div><button class="btn" id="start" style="width:100%">C’est parti</button>';
+    if (cat === "conj") h += '<p class="legend">Pour hiye, la fin s’entend et ou it : les deux sont acceptées.</p>';
+    if (cat === "poss") h += '<p class="legend">Tape juste le nom avec le suffixe (ex. ktebe). La phrase complète (hayda ktebe) est acceptée aussi.</p>';
+    h += "</div>";
+    view.innerHTML = h;
+    view.querySelectorAll("#gm button").forEach(function (b) { b.onclick = function () { mode = b.dataset.m; state["gmode" + cat] = mode; view.querySelectorAll("#gm button").forEach(function (x) { x.classList.toggle("on", x === b); }); }; });
+    $("#gs").onchange = function () { sel = this.value; state["gsel" + cat] = sel; };
+    $("#start").onclick = function () {
+      var again = function () { setupGroup(cat); };
+      if (mode === "grid") {
+        var g = sel === "rand" ? shuffle(gs.filter(function (x) { return x.items.length >= 3; }))[0] || gs[0] : gs.filter(function (x) { return x.id === sel; })[0];
+        return runGrid(g, cat);
+      }
+      var items = sel === "rand" ? [].concat.apply([], gs.map(function (g) { return g.items; })) : gs.filter(function (x) { return x.id === sel; })[0].items;
+      runQuiz(buildDeck(items, Math.min(12, items.length)).map(function (it) { return { it: it, dir: "fr2ar" }; }), again);
+    };
+  }
+
+  function runGrid(g, cat) {
+    var G = GROUPS[g.id];
+    var rows = PRONOUNS.map(function (p) { return g.items.filter(function (x) { return x.pron === p; })[0]; }).filter(Boolean);
+    var h = '<div class="card"><div class="prompt">' + arHTML(G.label) + ' <span class="muted" style="font-size:17px">' + esc(G.fr) + (cat === "conj" ? ", au passé" : "") + '</span></div><table class="grid">';
+    rows.forEach(function (it, k) {
+      h += '<tr><td class="p">' + arHTML(it.pron) + "<small>" + esc(PRON_FR[it.pron]) + '</small></td><td><input data-k="' + k + '" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false"><div class="corr" id="c' + k + '"></div></td></tr>';
+    });
+    h += '</table><div id="gres"></div><div class="row"><button class="btn" id="corr">Corriger</button><button class="btn sec" id="other">Autre tableau</button></div></div>';
+    view.innerHTML = h;
+    var inputs = view.querySelectorAll("table.grid input");
+    inputs.forEach(function (inp, k) { inp.addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); if (inputs[k + 1]) inputs[k + 1].focus(); else $("#corr").click(); } }); });
+    inputs[0].focus();
+    var done = false;
+    $("#corr").onclick = function () {
+      if (done) { return runGrid(g, cat); }
+      done = true; var good = 0;
+      rows.forEach(function (it, k) {
+        var q = question(it, "fr2ar"), inp = inputs[k], r = q.check(inp.value);
+        if (r) good++;
+        record(it, r, "fr2ar");
+        inp.classList.add(r ? "ok" : "ko"); inp.readOnly = true;
+        $("#c" + k).innerHTML = (r ? "" : arHTML(it.ar)) + badge(it) + (it.alt.length && r ? "" : "");
+      });
+      $("#gres").innerHTML = '<div class="fb ' + (good === rows.length ? "ok" : "ko") + '">' + good + " / " + rows.length + (good === rows.length ? " · tout juste, bravo !" : " · la bonne forme est en vert sous chaque erreur.") + "</div>";
+      $("#corr").textContent = "Recommencer";
+    };
+    $("#other").onclick = function () { setupGroup(cat); };
+  }
+
+  /* ---------- Mes erreurs ---------- */
+  function errorsScreen() {
+    setTitle("Mes erreurs");
+    var ids = Object.keys(store.errors);
+    var items = ITEMS.filter(function (x) { return store.errors[x.id]; });
+    if (!items.length) { view.innerHTML = '<div class="card"><p>Aucune erreur pour l’instant. Bravo !</p><button class="btn" id="back">Accueil</button></div>'; $("#back").onclick = home; return; }
+    items.sort(function (a, b) { return store.errors[b.id].n - store.errors[a.id].n; });
+    var h = '<div class="card"><h2>' + items.length + ' à retravailler</h2><div class="row" style="margin-bottom:10px"><button class="btn" id="replay">Rejouer mes erreurs</button><button class="btn ghost" id="clear">Vider la liste</button></div><ul class="errlist">';
+    items.forEach(function (it) {
+      var left = it.pron ? arHTML(it.pron) + " · " + arHTML(GROUPS[it.group].label) : esc(it.fr);
+      h += "<li><span>" + left + " → <b>" + arHTML(it.ar) + "</b>" + badge(it) + '</span><span class="n">' + store.errors[it.id].n + "×</span></li>";
+    });
+    h += '</ul><p class="legend">Une erreur sort de la liste quand tu la réussis en rejouant.</p></div>';
+    view.innerHTML = h;
+    $("#replay").onclick = function () {
+      runQuiz(shuffle(items).map(function (it) { return { it: it, dir: store.errors[it.id].dir === "ar2fr" ? "ar2fr" : "fr2ar" }; }), errorsScreen, true);
+    };
+    $("#clear").onclick = function () { if (confirm("Vider la liste des erreurs ?")) { store.errors = {}; save(); errorsScreen(); } };
+  }
+
+  $("#homeBtn").onclick = home;
+  scoreUI();
+  home();
+  window.__app = { norm: norm, frNorm: frNorm, question: question, ITEMS: ITEMS, go: go, home: home };
+})();
+
+</script>
+</body>
+</html>
